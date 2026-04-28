@@ -4,12 +4,13 @@ import os
 import numpy as np
 from pyzbar import pyzbar
 import pandas as pd
+from pathlib import Path
 
 clase = {0: "2020", 1: "2021", 2: "2022", 3: "2023", 4: "2024", 5: "2025", 6: "sbn"}
-dataset_inventario = []
+#dataset_inventario = []
 
 
-def crop_oriented_bbox(image, pts, cls_obj, n):
+def crop_oriented_bbox(image, pts, cls_obj, n, file_name,lista_local):
     # 1. Convertir puntos a float32 y darles forma de (4, 2)
     pts = np.array(pts, dtype="float32").reshape(4, 2)
 
@@ -40,15 +41,19 @@ def crop_oriented_bbox(image, pts, cls_obj, n):
     img_flip = cv2.flip(warped, 1)
     f_clase = clase[int(cls_obj)]
     filename = f"recorte_{f_clase}_{n}.jpg"
-    final_path = os.path.join(folder_path, filename)
+    im_folder_path = os.path.join(
+        Path(__file__).resolve().parent.parent, "output_predicciones", file_name
+    )
+    final_path = os.path.join(im_folder_path, filename)
     cv2.imwrite(final_path, img_flip)
 
     datos = read_barcode(final_path)
     for d in datos:
-        #print(f"Contenido: {d['data']} | Inventario:{f_clase} | Tipo: {d['type']}")
-        dataset_inventario.append(
+        # print(f"Contenido: {d['data']} | Inventario:{f_clase} | Tipo: {d['type']}")
+        lista_local.append(
             {
-                "Archivo_Original": file_name,
+                "Carpeta": file_name,  # nombre de la carpeta
+                "Archivo_Original": filename,  # nombre del archivo
                 "Codigo_Texto": d["data"],
                 "Clase_Inventario": f_clase,
                 "Tipo_Codigo": d["type"],
@@ -77,39 +82,61 @@ def read_barcode(image_path):
     return results
 
 
-trained_model = YOLO("runs/obb/etiquetas_obb-3/weights/best.pt")
-results = trained_model("../dataset/test/*.jpg")
+def evaluate(ruta, n):
+    dataset_inventario_local = []
+    MODEL_PATH = (
+        Path(__file__).resolve().parent / "runs/obb/etiquetas_obb-3/weights/best.pt"
+    )
+    trained_model = YOLO(str(MODEL_PATH))
+    results = trained_model(ruta)
 
-for result in results:
-    full_path = result.path
-    file_name = os.path.basename(full_path)
-    # print(f"Imagen {file_name}")
-    # print("-------------------")
-    folder_path = os.path.join("../output_predicciones", file_name)
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-        print(f"Carpeta creada: {folder_path}")
-    image = result.orig_img
+    for result in results:
+        full_path = result.path
+        file_name = os.path.basename(full_path)
+        # print(f"Imagen {file_name}")
+        # print("-------------------")
+        folder_path = os.path.join(
+            Path(__file__).resolve().parent.parent, "output_predicciones", file_name
+        )
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+            print(f"Carpeta creada: {folder_path}")
+        image = result.orig_img
 
-    cls_detected = result.obb.cls
-    tensor_points = result.obb.xyxyxyxy
-    n = 1
-    for tensor_points_obj, cls_obj in zip(tensor_points, cls_detected):
-        # Convertimos el tensor en numpy
-        points = tensor_points_obj.cpu().numpy().squeeze()
-        # Rendimensionamos y convertimos a enteros
-        points = points.reshape((4, 2)).astype(np.int32)
+        cls_detected = result.obb.cls
+        tensor_points = result.obb.xyxyxyxy
+        n = 1
+        for tensor_points_obj, cls_obj in zip(tensor_points, cls_detected):
+            # Convertimos el tensor en numpy
+            points = tensor_points_obj.cpu().numpy().squeeze()
+            # Rendimensionamos y convertimos a enteros
+            points = points.reshape((4, 2)).astype(np.int32)
 
-        wraper = crop_oriented_bbox(image, points, cls_obj, n)
-        n += 1
+            wraper = crop_oriented_bbox(image, points, cls_obj, n, file_name,dataset_inventario_local)
+            n += 1
+
+    if dataset_inventario_local:
+        df = pd.DataFrame(dataset_inventario_local)
+        if n == 1:
+            nombre_csv = "reporte_final_inventario.csv"
+            # Exportamos a CSV (usamos utf-8-sig para que Excel lo abra sin errores de caracteres)
+            df.to_csv(nombre_csv, index=False, encoding="utf-8-sig")
+            print(f"\n¡Proceso completado! Dataset guardado como: {nombre_csv}")
+        else:
+            nombre_csv = "reporte_final.csv"
+            # Exportamos a CSV (usamos utf-8-sig para que Excel lo abra sin errores de caracteres)
+            csv_full_path = os.path.join(folder_path, nombre_csv)
+            df.to_csv(csv_full_path, index=False, encoding="utf-8-sig")
+            print(f"\n¡Proceso completado! Dataset guardado como: {nombre_csv}")
+            return df
+
+    else:
+        print("No se encontraron códigos de barras para guardar.")
+        return 0
+
+    return 0
 
 
-if dataset_inventario:
-    df = pd.DataFrame(dataset_inventario)
-    nombre_csv = "reporte_final_inventario.csv"
-    
-    # Exportamos a CSV (usamos utf-8-sig para que Excel lo abra sin errores de caracteres)
-    df.to_csv(nombre_csv, index=False, encoding='utf-8-sig')
-    print(f"\n¡Proceso completado! Dataset guardado como: {nombre_csv}")
-else:
-    print("No se encontraron códigos de barras para guardar.")
+if __name__ == "__main__":
+    ruta = "../dataset/test/*.jpg"
+    evaluate(ruta, 1)

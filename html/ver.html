@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Ver</title>
+  </head>
+
+  <body>
+    <h2>Resultados</h2>
+
+    <div class="seccion-original">
+      <h3>Imagen Original</h3>
+      <img
+        id="miImagenOriginal"
+        style="width: 400px"
+        src=""
+        alt="Cargando imagen original..."
+      />
+    </div>
+
+    <hr />
+
+    <h3>Inventario Detectado</h3>
+    <table id="tabla-inventario" border="1">
+      <thead>
+        <tr id="cabecera"></tr>
+      </thead>
+      <tbody id="cuerpo"></tbody>
+    </table>
+
+    <h3>Recortes Detectados</h3>
+    <div id="contenedor-imagenes"></div>
+
+    <script>
+      async function getId() {
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        let idImagen = urlParams.get("id");
+
+        const imgOriginal = document.getElementById("miImagenOriginal");
+        imgOriginal.src = `http://127.0.0.1:8000/list-original/${idImagen}`;
+
+        if (idImagen) {
+          idImagen = idImagen.replace(/'/g, "");
+          console.log("Buscando predicciones para:", idImagen);
+
+          try {
+            // 1. Pedir la lista de archivos al servidor
+            const response = await fetch(
+              `http://127.0.0.1:8000/list-images/${idImagen}`,
+            );
+            const imagenes = await response.json();
+
+            const contenedor = document.getElementById("contenedor-imagenes");
+            contenedor.innerHTML = ""; // Limpiar antes de llenar
+
+            // 2. Crear un <img> por cada archivo encontrado
+            imagenes.forEach((nombreArchivo) => {
+              const img = document.createElement("img");
+              // Importante: La URL debe apuntar a donde FastAPI sirve los estáticos
+              img.src = `http://127.0.0.1:8000/output_predicciones/${idImagen}/${nombreArchivo}`;
+              img.style.width = "200px"; // Tamaño miniatura
+              img.style.margin = "10px";
+              img.alt = "Recorte YOLO";
+
+              contenedor.appendChild(img);
+            });
+
+            //////////////////////////////////////////////////////////////////////////
+
+            const respInventario = await fetch(
+              `http://127.0.0.1:8000/list-prediction/${idImagen}`,
+            );
+            const datosInventario = await respInventario.json();
+
+            // Limpiar tabla
+            cabecera.innerHTML = "";
+            cuerpo.innerHTML = "";
+
+            // Crear Cabeceras dinámicamente basadas en las llaves del JSON
+            Object.keys(datosInventario[0]).forEach((key) => {
+              const th = document.createElement("th");
+              th.innerText = key.toUpperCase();
+              cabecera.appendChild(th);
+            });
+
+            console.log(datosInventario);
+            // Llenar las filas de la tabla
+            datosInventario.forEach((fila) => {
+              //console.log(fila);
+              const tr = document.createElement("tr");
+              Object.values(fila).forEach((valor) => {
+                const td = document.createElement("td");
+                td.innerText = valor;
+                tr.appendChild(td);
+              });
+              cuerpo.appendChild(tr);
+            });
+          } catch (error) {
+            console.error("Error cargando predicciones:", error);
+          }
+        }
+      }
+
+      window.onload = getId;
+    </script>
+  </body>
+</html>

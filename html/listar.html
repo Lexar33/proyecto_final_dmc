@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Lista de Archivos Subidos</title>
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f4f4f4;
+      }
+      tr:hover {
+        background-color: #f9f9f9;
+      }
+      .btn-predict {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Archivos Registrados en el Servidor</h2>
+
+    <button onclick="cargarTabla()">Actualizar Lista</button>
+
+    <table id="tablaArchivos">
+      <thead>
+        <tr>
+          <th>Nombre Original</th>
+          <th>Nombre UUID (ID)</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      async function cargarTabla() {
+        try {
+          // Llamada a tu API de FastAPI
+          const response = await fetch("http://127.0.0.1:8000/listar");
+          const datos = await response.json();
+
+          const tbody = document.querySelector("#tablaArchivos tbody");
+          tbody.innerHTML = ""; // Limpiar tabla antes de llenar
+
+          datos.forEach((archivo) => {
+            const fila = document.createElement("tr");
+
+            fila.innerHTML = `
+                      <td>${archivo.nombre_original}</td>
+                      <td>${archivo.uuid_name}</td>
+                      <td>
+                            <button class="btn-predict" onclick="ejecutarPrediccion('${archivo.uuid_name}')">
+                              Predecir
+                            </button>
+                            <a href="/html/ver.html?id=${archivo.uuid_name}">
+                                <button class="btn-predict">
+                                Ver
+                                </button>
+                            </a>
+                      </td>
+                  `;
+
+            tbody.appendChild(fila);
+          });
+        } catch (error) {
+          console.error("Error al cargar los datos:", error);
+          alert("No se pudo conectar con la API");
+        }
+      }
+
+      async function ejecutarPrediccion(uuid) {
+        // Llamada a tu otro endpoint de predicción
+        const response = await fetch("http://127.0.0.1:8000/predict", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          // Enviamos el nombre como un objeto JSON
+          body: JSON.stringify({ nombre_archivo: uuid }),
+        });
+        const resultado = await response.json();
+        if (response.ok) {
+          alert("Terminado");
+        } else {
+          alert("Ocurrió un error");
+        }
+      }
+
+      window.onload = cargarTabla;
+    </script>
+  </body>
+</html>

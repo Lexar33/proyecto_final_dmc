@@ -9,3 +9,8 @@ imutils==0.5.4
 numpy<2.0
 pyzbar==0.1.9
 pandas==3.0.2
+
+fastapi==0.136.1
+fastapi-cli==0.0.24
+fastapi-cloud-cli==0.17.1
+uvicorn==0.46.0

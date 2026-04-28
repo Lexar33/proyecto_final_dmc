@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+  <body>
+    <h2>Subir Foto a FastAPI</h2>
+
+    <input type="file" id="archivoInput" accept="image/*" />
+    <button onclick="subirFoto()">Enviar Imagen</button>
+
+    <p id="status"></p>
+
+    <!--button id="btnPredict" onclick="ejecutarPredict()" disabled>
+      Ejecutar Predicción
+    </!--button>
+
+    <div--
+      id="contenedorImagenes"
+      style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px"
+    ></div-->
+
+    <script>
+      async function subirFoto() {
+        const input = document.getElementById("archivoInput");
+        const status = document.getElementById("status");
+
+        if (input.files.length === 0) {
+          alert("Por favor, selecciona un archivo primero.");
+          return;
+        }
+
+        // 1. Crear el objeto FormData (esto añade el header multipart/form-data automáticamente)
+        const formData = new FormData();
+        // El nombre 'file' debe coincidir exactamente con el nombre del parámetro en FastAPI
+        formData.append("file", input.files[0]);
+
+        try {
+          status.innerText = "Subiendo...";
+
+          // 2. Enviar la petición POST
+          const response = await fetch("http://127.0.0.1:8000/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            nombreArchivoServidor = result.uuid_name;
+            status.innerText =
+              "¡Éxito! Archivo subido: " + nombreArchivoServidor;
+            window.location.href = "listar.html";
+          } else {
+            status.innerText = "Error en el servidor.";
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          status.innerText = "No se pudo conectar con el servidor.";
+        }
+      }
+    </script>
+  </body>
+</html>

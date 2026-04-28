@@ -8,3 +8,4 @@ ENV/
 bin/
 lib/
 dmc_env/
+dmc_entorno/
