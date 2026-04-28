@@ -1,0 +1,13 @@
+path: ../dataset
+train: train/images
+val: val/images
+
+names:    
+  0: "2020"
+  1: "2021"
+  2: "2022"
+  3: "2023"
+  4: "2024"
+  5: "2025"
+  6: "sbn"
+  
