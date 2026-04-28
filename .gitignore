@@ -1,6 +1,5 @@
-dataset
-original_dataset
-output_predicciones
+dataset/
+output_predicciones/
 
 venv/
 .venv/
