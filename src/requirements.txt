@@ -1,4 +1,5 @@
 #pip install torch==2.3.1+cu121 torchvision==0.18.1+cu121 torchaudio==2.3.1+cu121 --extra-index-url https://download.pytorch.org/whl/cu121
+#pip install fastapi[standard] uvicorn
 ultralytics==8.4.41
 ultralytics-thop==2.0.19
 opencv-python==4.9.0.80
@@ -8,4 +9,3 @@ imutils==0.5.4
 numpy<2.0
 pyzbar==0.1.9
 pandas==3.0.2
-flask==3.1.3
