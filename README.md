@@ -1,21 +1,22 @@
-# OBB PARA IDENTIFICACIÓN DE ETIQUETAS DE INVENTARIO
-
+# OBB para identificación de etiquetas de inventario
 ___________________
 
+Autor : Jose Alcantara
+Diplomado : Advanced Data Scientist
+Institución : DMC
 
-|        | VERSION | 
+|       | VERSION | 
 | :---  | :----: |
 | PYTHON | 3.11 | 
 
-## CREACIÓN ENTORNO VIRTUAL
+## Creación de entorno virtual
 py -3.11 -m venv dmc_env
 
-## EJECUCIÓN
-
+## Ejecución
+pip install -r requirements.txt
 python evaluate.py
 uvicorn app:app --reload
 
-## DATASET
-
+## Dataset
 https://drive.google.com/drive/folders/1cz_b2SdqTxHGpXAELnCEhHlNhYKIV84x?usp=sharing
 
