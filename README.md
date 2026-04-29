@@ -1,9 +1,9 @@
 # OBB para identificación de etiquetas de inventario
 ___________________
 
-Autor : Jose Alcantara
-Diplomado : Advanced Data Scientist
-Institución : DMC
+Autor : Jose Alcantara  
+Diplomado : Advanced Data Scientist  
+Institución : DMC  
 
 |       | VERSION | 
 | :---  | :----: |
