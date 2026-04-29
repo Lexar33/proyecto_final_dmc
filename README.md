@@ -1,4 +1,4 @@
-## OBB PARA IDENTIFICACIÓN DE ETIQUETAS DE INVENTARIO
+# OBB PARA IDENTIFICACIÓN DE ETIQUETAS DE INVENTARIO
 
 ___________________
 
@@ -7,16 +7,15 @@ ___________________
 | :---  | :----: |
 | PYTHON | 3.11 | 
 
-# CREACIÓN ENTORNO VIRTUAL
+## CREACIÓN ENTORNO VIRTUAL
 py -3.11 -m venv dmc_env
 
-# EJECUCIÓN
+## EJECUCIÓN
 
+python evaluate.py
+uvicorn app:app --reload
 
+## DATASET
 
-
-
-Dataset de datos:
 https://drive.google.com/drive/folders/1cz_b2SdqTxHGpXAELnCEhHlNhYKIV84x?usp=sharing
 
-uvicorn app:app --reload
