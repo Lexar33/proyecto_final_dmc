@@ -13,9 +13,9 @@ Institución : DMC
 py -3.11 -m venv dmc_env
 
 ## Ejecución
-pip install -r requirements.txt
-python evaluate.py
-uvicorn app:app --reload
+pip install -r requirements.txt  
+python evaluate.py  
+uvicorn app:app --reload  
 
 ## Dataset
 https://drive.google.com/drive/folders/1cz_b2SdqTxHGpXAELnCEhHlNhYKIV84x?usp=sharing
